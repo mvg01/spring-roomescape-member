@@ -1,6 +1,8 @@
 package roomescape.domain;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 import roomescape.exception.RoomescapeException;
 import roomescape.model.Theme;
@@ -9,19 +11,14 @@ public class ThemeTest {
 
     @Test
     public void 테마_이름은_1자_이상_20자_이하를_가진다() {
-        Theme theme = new Theme(1L, "붉은 요람", "아이의 울음소리가 멈추면, 비로소 당신의 비명이 시작됩니다.", "https://fake.html") {
-        };
+        Theme theme = new Theme(1L, "테스트 테마", "테스트 설명.", "fakeurl");
 
-        int size = 5;
-        int nameSize = theme.name().length();
-
-        Assertions.assertEquals(size, nameSize);
+        assertEquals(6, theme.name().length());
     }
 
     @Test
     public void 테마_이름이_20자_초과_될_경우_예외가_발생한다() {
-        String name = "dsdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf";
-        Assertions.assertThrows(RoomescapeException.class, () ->
-                new Theme(1L, name, "아이의 울음소리", "https://fake.com"));
+        String name = "a".repeat(21);
+        assertThrows(RoomescapeException.class, () -> new Theme(1L, name, "테스트 설명.", "fakeurl"));
     }
 }
