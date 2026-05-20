@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -56,7 +57,7 @@ public class ReservationControllerTest {
 
     @Test
     public void 전체_예약_조회_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/reservations")
                 .then().log().all()
@@ -66,7 +67,7 @@ public class ReservationControllerTest {
 
     @Test
     public void 예약_삭제_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/" + reservation1.id())
                 .then().log().all()
@@ -75,7 +76,7 @@ public class ReservationControllerTest {
 
     @Test
     public void 존재하지_않는_예약_삭제_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/" + Long.MAX_VALUE)
                 .then().log().all()
@@ -89,7 +90,7 @@ public class ReservationControllerTest {
                 time1.id(),
                 theme1.id());
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationRequest)
                 .when().post("/reservations")
@@ -104,7 +105,7 @@ public class ReservationControllerTest {
         ReservationRequest reservationRequest = new ReservationRequest(reservation1.name(), LocalDate.now().plusDays(1),
                 reservation1.time().id(), reservation1.theme().id());
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationRequest)
                 .when().post("/reservations")
@@ -115,7 +116,7 @@ public class ReservationControllerTest {
 
     @Test
     public void 잘못된_형식의_날짜_입력시_예외가_발생한다() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body("{\"name\": \"포비\", \"date\": \"abc\", \"timeId\": 2, \"themeId\": 2}")
                 .when().post("/reservations")
@@ -126,7 +127,7 @@ public class ReservationControllerTest {
 
     @Test
     public void 사용자_이름으로_예약을_조회할_수_있다() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("name", reservation1.name())
                 .when().get("/reservations/user")
@@ -140,7 +141,7 @@ public class ReservationControllerTest {
         String requestBody = String.format("{\"date\": \"%s\", \"timeId\": %d}", LocalDate.now().plusDays(2),
                 time2.id());
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when().patch("/reservations/user/" + reservation1.id())
@@ -153,7 +154,7 @@ public class ReservationControllerTest {
         String requestBody = String.format("{\"date\": \"%s\", \"timeId\": %d}", LocalDate.now().minusYears(1),
                 time1.id());
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when().patch("/reservations/user/" + reservation1.id())
@@ -169,7 +170,7 @@ public class ReservationControllerTest {
         String requestBody = String.format("{\"date\": \"%s\", \"timeId\": %d}", LocalDate.now().plusDays(2),
                 time2.id());
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when().patch("/reservations/user/" + reservation3.id())
@@ -183,7 +184,7 @@ public class ReservationControllerTest {
         String requestBody = String.format("{\"date\": \"%s\", \"timeId\": %d, \"themeId\": %d}",
                 LocalDate.now().plusDays(1), time1.id(), theme1.id());
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when().post("/reservations")

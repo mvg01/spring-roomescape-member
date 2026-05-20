@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -58,7 +59,7 @@ public class ReservationTimeControllerTest {
 
     @Test
     public void 전체_시간_조회_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/times")
                 .then().log().all()
@@ -70,7 +71,7 @@ public class ReservationTimeControllerTest {
     public void 테마_별_예약가능한_시간_조회_API() {
         LocalDate date = LocalDate.now().plusDays(1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("date", date.toString())
                 .when().get("/times/" + theme1.id())
@@ -82,7 +83,7 @@ public class ReservationTimeControllerTest {
     @Test
     public void 예약_가능한_시간_삭제_API() {
         ReservationTime time3 = timeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/times/" + time3.id())
                 .then().log().all()
@@ -91,7 +92,7 @@ public class ReservationTimeControllerTest {
 
     @Test
     public void 존재하지_않는_시간_삭제_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/times/" + Long.MAX_VALUE)
                 .then().log().all()
@@ -101,7 +102,7 @@ public class ReservationTimeControllerTest {
 
     @Test
     public void 예약이_존재하는_시간은_삭제할_수_없다() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/times/" + time1.id())
                 .then().log().all()
@@ -113,7 +114,7 @@ public class ReservationTimeControllerTest {
     public void 예약_가능한_시간_추가_API() {
         TimeRequest timeRequest = new TimeRequest(LocalTime.of(12, 0));
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(timeRequest)
                 .when().post("/times")
@@ -124,7 +125,7 @@ public class ReservationTimeControllerTest {
 
     @Test
     public void 잘못된_형식의_시간_입력시_예외가_발생한다() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body("{\"startAt\": \"abc\"}")
                 .when().post("/times")
@@ -135,7 +136,7 @@ public class ReservationTimeControllerTest {
 
     @Test
     public void 시작시간_없이_예약시간_생성시_예외가_발생한다() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().post("/times")
                 .then().log().all()

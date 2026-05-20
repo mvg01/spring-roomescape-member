@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -37,7 +38,7 @@ public class ThemeControllerTest {
 
     @Test
     public void 테마_전체_조회_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/themes")
                 .then().log().all()
@@ -49,7 +50,7 @@ public class ThemeControllerTest {
     public void 테마_추가_API() {
         ThemeRequest themeRequest = new ThemeRequest("테스트 테마", "테스트입니다", "url");
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body(themeRequest)
                 .when().post("/themes")
@@ -61,7 +62,7 @@ public class ThemeControllerTest {
 
     @Test
     public void 특정_테마_삭제_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/themes/" + theme1.id())
                 .then().log().all()
@@ -70,7 +71,7 @@ public class ThemeControllerTest {
 
     @Test
     public void 존재하지_않는_테마_삭제_API() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/themes/" + Long.MAX_VALUE)
                 .then().log().all()
@@ -80,7 +81,7 @@ public class ThemeControllerTest {
 
     @Test
     public void 인기_테마_조회_API의_limit값이_30초과면_예외() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("limit", 31)
                 .when().get("/themes/ranks")
@@ -91,7 +92,7 @@ public class ThemeControllerTest {
 
     @Test
     public void 인기_테마_조회_API의_limit값이_1미만이면_예외() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("limit", 0)
                 .when().get("/themes/ranks")
@@ -102,7 +103,7 @@ public class ThemeControllerTest {
 
     @Test
     public void 인기_테마_조회_API의_limit값이_없으면_예외() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/themes/ranks")
                 .then().log().all()
@@ -112,7 +113,7 @@ public class ThemeControllerTest {
 
     @Test
     public void 이름_없이_테마_생성시_예외가_발생한다() {
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .body("{\"description\": \"테스트설명\", \"url\": \"fakeURL\"}")
                 .when().post("/themes")
