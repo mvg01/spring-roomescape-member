@@ -6,23 +6,33 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.ThemeRequest;
+import roomescape.model.Theme;
+import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Sql(scripts = {"/truncate.sql", "/mockData.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 
 public class ThemeControllerTest {
 
+    @Autowired
+    ThemeRepository themeRepository;
     @LocalServerPort
     private int port;
+
+    private Theme theme1;
+    private Theme theme2;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        theme1 = themeRepository.save(new Theme(null, "테스트_테마_1", "테스트1입니다", "FakeURL"));
+        theme2 = themeRepository.save(new Theme(null, "테스트_테마_2", "테스트2입니다", "FakeURL"));
     }
 
     @Test
@@ -32,12 +42,12 @@ public class ThemeControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("themes.size()", is(17));
+                .body("themes.size()", is(2));
     }
 
     @Test
     public void 테마_추가_API() {
-        ThemeRequest themeRequest = new ThemeRequest("공포 영화", "테스트입니다", "url");
+        ThemeRequest themeRequest = new ThemeRequest("테스트 테마", "테스트입니다", "url");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -45,14 +55,15 @@ public class ThemeControllerTest {
                 .when().post("/themes")
                 .then().log().all()
                 .statusCode(201)
-                .body("size()", is(4));
+                .body("name", is("테스트 테마"))
+                .body("description", is("테스트입니다"));
     }
 
     @Test
     public void 특정_테마_삭제_API() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().delete("/themes/7")
+                .when().delete("/themes/" + theme1.id())
                 .then().log().all()
                 .statusCode(204);
     }
@@ -61,14 +72,14 @@ public class ThemeControllerTest {
     public void 존재하지_않는_테마_삭제_API() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().delete("/themes/9999")
+                .when().delete("/themes/" + Long.MAX_VALUE)
                 .then().log().all()
                 .statusCode(404)
                 .body("code", is("THEME_NOT_FOUND"));
     }
 
     @Test
-    public void 인기_테마_조회_API의_limit값_1() {
+    public void 인기_테마_조회_API의_limit값이_30초과면_예외() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("limit", 31)
@@ -79,7 +90,7 @@ public class ThemeControllerTest {
     }
 
     @Test
-    public void 인기_테마_조회_API의_limit값_2() {
+    public void 인기_테마_조회_API의_limit값이_1미만이면_예외() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("limit", 0)
@@ -90,7 +101,7 @@ public class ThemeControllerTest {
     }
 
     @Test
-    public void 인기_테마_조회_API의_limit값이_없을_때() {
+    public void 인기_테마_조회_API의_limit값이_없으면_예외() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/themes/ranks")
@@ -103,7 +114,7 @@ public class ThemeControllerTest {
     public void 이름_없이_테마_생성시_예외가_발생한다() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body("{\"description\": \"설명\", \"url\": \"http://example.com\"}")
+                .body("{\"description\": \"테스트설명\", \"url\": \"fakeURL\"}")
                 .when().post("/themes")
                 .then().log().all()
                 .statusCode(400)
