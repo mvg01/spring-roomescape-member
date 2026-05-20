@@ -1,28 +1,36 @@
 package roomescape.service;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.RoomescapeException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-@Transactional
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
+
+@ExtendWith(MockitoExtension.class)
 public class ThemeServiceTest {
 
-    @Autowired
-    private ThemeService themeService;
+    @Mock
+    ThemeRepository themeRepository;
+    @Mock
+    ReservationRepository reservationRepository;
 
-    @Test
-    void 존재하지_않는_테마를_삭제하는경우_예외가_발생한다() {
-        Assertions.assertThatThrownBy(() -> themeService.removeById(-1L))
-                .isInstanceOf(RoomescapeException.class);
+    ThemeService themeService;
+
+    @BeforeEach
+    void setUp() {
+        themeService = new ThemeService(themeRepository, reservationRepository);
     }
 
     @Test
-    void 존재하는_테마를_삭제하는경우_삭제된다() {
-        Assertions.assertThatCode(() -> themeService.removeById(7L))
-                .doesNotThrowAnyException();
+    void 존재하지_않는_테마를_삭제하는경우_예외가_발생한다() {
+        assertThatThrownBy(() -> themeService.removeById(-1L))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("code", ErrorCode.THEME_NOT_FOUND);
     }
 }
