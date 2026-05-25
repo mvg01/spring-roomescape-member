@@ -2,332 +2,855 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>방탈출 예약</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; }
-
-        header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: white; padding: 20px 0; text-align: center;
-            position: relative;
+        @font-face {
+            font-family: 'Pretendard Variable';
+            font-weight: 45 920;
+            font-style: normal;
+            font-display: swap;
+            src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2') format('woff2-variations');
         }
-        header h1 { font-size: 1.8rem; }
-        header p { margin-top: 4px; opacity: 0.8; font-size: 0.9rem; }
+
+        /* =========================================================
+           Tokens — Toss-style
+           ========================================================= */
+        :root {
+            --bg: #F9FAFB;
+            --surface: #FFFFFF;
+            --surface-mute: #F2F4F6;
+
+            --ink-900: #191F28;
+            --ink-700: #333D4B;
+            --ink-500: #4E5968;
+            --ink-400: #6B7684;
+            --ink-300: #8B95A1;
+            --ink-200: #B0B8C1;
+            --ink-100: #D1D6DB;
+            --line: #E5E8EB;
+
+            --primary: #3182F6;
+            --primary-press: #1B64DA;
+            --primary-soft: #E8F2FE;
+
+            --positive: #00C896;
+            --negative: #F04452;
+            --warning: #FF9500;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-pill: 999px;
+
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+            --shadow-modal: 0 24px 48px rgba(0,0,0,0.18);
+
+            --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --dur: 180ms;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        * { margin: 0; padding: 0; }
+
+        html, body {
+            font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
+                         'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            color: var(--ink-900);
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        input, select { font-family: inherit; }
+
+        /* =========================================================
+           App shell — phone-first centered column
+           ========================================================= */
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            background: var(--bg);
+            min-height: 100vh;
+            padding-bottom: 120px;
+        }
+
+        /* =========================================================
+           Top bar
+           ========================================================= */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+        .topbar h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--ink-900);
+        }
         .admin-link {
-            position: absolute; top: 50%; right: 24px; transform: translateY(-50%);
-            color: white; text-decoration: none; font-size: 0.9rem;
-            border: 1px solid rgba(255,255,255,0.5); padding: 6px 14px; border-radius: 20px;
-            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-400);
+            text-decoration: none;
+            border-radius: var(--radius-pill);
+            background: var(--surface-mute);
+            transition: background var(--dur) var(--ease);
         }
-        .admin-link:hover { background: rgba(255,255,255,0.15); }
+        .admin-link:hover { background: var(--line); color: var(--ink-700); }
 
-        nav {
-            display: flex; justify-content: center; gap: 12px;
-            background: #fff; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        /* =========================================================
+           Hero
+           ========================================================= */
+        .hero {
+            padding: 8px 20px 24px;
         }
-        nav button {
-            padding: 8px 20px; border: 2px solid #3498db; border-radius: 20px;
-            background: white; color: #3498db; cursor: pointer; font-size: 0.9rem;
-            transition: all 0.2s;
+        .hero h2 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            line-height: 1.25;
+            color: var(--ink-900);
         }
-        nav button:hover, nav button.active {
-            background: #3498db; color: white;
+        .hero h2 .accent { color: var(--primary); }
+        .hero p {
+            margin-top: 8px;
+            font-size: 15px;
+            color: var(--ink-400);
         }
 
-        .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+        /* =========================================================
+           Tab bar — segmented
+           ========================================================= */
+        nav.tabs {
+            position: sticky;
+            top: 56px;
+            z-index: 20;
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px 12px;
+            background: var(--bg);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        nav.tabs::-webkit-scrollbar { display: none; }
+        nav.tabs button {
+            flex: 0 0 auto;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink-400);
+            background: transparent;
+            border-radius: var(--radius-pill);
+            transition: all var(--dur) var(--ease);
+            white-space: nowrap;
+        }
+        nav.tabs button.active {
+            color: var(--surface);
+            background: var(--ink-900);
+        }
+        nav.tabs button:not(.active):hover {
+            background: var(--surface-mute);
+            color: var(--ink-700);
+        }
 
+        /* =========================================================
+           Sections
+           ========================================================= */
+        main { padding: 8px 20px 40px; }
         .section { display: none; }
         .section.active { display: block; }
 
-        .card {
-            background: white; border-radius: 12px; padding: 20px;
-            margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin: 16px 0 16px;
         }
-        .card h3 { margin-bottom: 8px; color: #2c3e50; }
-        .card p { color: #666; font-size: 0.9rem; line-height: 1.5; }
+        .section-header h3 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--ink-900);
+        }
+        .section-header .sub {
+            font-size: 13px;
+            color: var(--ink-400);
+        }
 
+        /* =========================================================
+           Theme grid
+           ========================================================= */
         .theme-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
+        @media (min-width: 520px) {
+            .app { max-width: 720px; }
+            .theme-grid { grid-template-columns: 1fr 1fr; }
+        }
+
         .theme-card {
-            background: white; border-radius: 12px; overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+            cursor: pointer;
         }
-        .theme-card:hover { transform: translateY(-4px); }
-        .theme-card img {
-            width: 100%; height: 160px; object-fit: cover; background: #ddd;
+        .theme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
-        .theme-card .info { padding: 14px; }
-        .theme-card .info h3 { font-size: 1rem; margin-bottom: 6px; }
-        .theme-card .info p { font-size: 0.85rem; color: #666; line-height: 1.4; }
-
-        .rank-badge {
+        .theme-card .thumb {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 5 / 3;
+            background: var(--surface-mute);
+            overflow: hidden;
+        }
+        .theme-card .thumb img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .theme-card .rank {
+            position: absolute;
+            top: 12px; left: 12px;
             display: inline-flex; align-items: center; justify-content: center;
-            background: #e74c3c; color: white; width: 24px; height: 24px;
-            border-radius: 50%; font-weight: bold; font-size: 0.8rem;
-            flex-shrink: 0; margin-right: 6px;
+            min-width: 28px; height: 28px; padding: 0 10px;
+            background: rgba(25,31,40,0.85);
+            backdrop-filter: blur(8px);
+            color: white;
+            border-radius: var(--radius-pill);
+            font-size: 13px; font-weight: 700;
+            font-variant-numeric: tabular-nums;
         }
-        .theme-card .info .title-row {
-            display: flex; align-items: center; margin-bottom: 6px;
+        .theme-card .info { padding: 14px 16px 18px; }
+        .theme-card .info h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink-900);
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+        .theme-card .info p {
+            font-size: 13px;
+            color: var(--ink-400);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
-            font-size: 0.9rem;
+        /* =========================================================
+           Form list — Toss-style stacked fields
+           ========================================================= */
+        .field-list {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 4px 0;
+            margin-bottom: 16px;
         }
-        .form-group input:focus, .form-group select:focus {
-            outline: none; border-color: #3498db;
+        .field {
+            display: flex;
+            flex-direction: column;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+        .field:last-child { border-bottom: none; }
+        .field label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink-400);
+            margin-bottom: 6px;
+        }
+        .field input,
+        .field select {
+            width: 100%;
+            border: none;
+            padding: 0;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--ink-900);
+            background: transparent;
+            outline: none;
+            letter-spacing: -0.01em;
+        }
+        .field input::placeholder { color: var(--ink-200); font-weight: 500; }
+        .field select { appearance: none; padding-right: 28px;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238B95A1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right center;
         }
 
-        .time-slots { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+        /* time-slot field has its own layout */
+        .field.times {
+            padding-bottom: 20px;
+        }
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 4px;
+        }
+        @media (max-width: 380px) { .time-slots { grid-template-columns: repeat(3, 1fr); } }
+
         .time-slot {
-            padding: 10px 20px; border: 2px solid #3498db; border-radius: 8px;
-            background: white; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+            padding: 12px 0;
+            border-radius: var(--radius-md);
+            background: var(--surface-mute);
+            color: var(--ink-700);
+            font-size: 15px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+            transition: all var(--dur) var(--ease);
         }
-        .time-slot:hover, .time-slot.selected {
-            background: #3498db; color: white;
+        .time-slot:hover {
+            background: var(--line);
+        }
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
         }
         .time-slot.unavailable {
-            border-color: #ccc; color: #ccc; cursor: not-allowed; text-decoration: line-through;
+            background: transparent;
+            color: var(--ink-200);
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
+        .empty-slots {
+            grid-column: 1 / -1;
+            padding: 24px 0;
+            text-align: center;
+            font-size: 14px;
+            color: var(--ink-300);
         }
 
+        /* =========================================================
+           Primary CTA — bottom-docked button
+           ========================================================= */
+        .cta-dock {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, var(--bg) 70%, rgba(249,250,251,0));
+            z-index: 25;
+        }
+        @media (min-width: 520px) {
+            .cta-dock { max-width: 720px; }
+        }
         .btn-primary {
-            padding: 12px 32px; background: #3498db; color: white; border: none;
-            border-radius: 8px; font-size: 1rem; cursor: pointer; transition: background 0.2s;
+            width: 100%;
+            padding: 16px 20px;
+            min-height: 56px;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            transition: background var(--dur) var(--ease), transform 80ms ease;
         }
-        .btn-primary:hover { background: #2980b9; }
-        .btn-primary:disabled { background: #bdc3c7; cursor: not-allowed; }
-
-        .btn-sm {
-            padding: 6px 14px; border: none; border-radius: 6px;
-            font-size: 0.82rem; cursor: pointer; transition: background 0.2s;
+        .btn-primary:hover:not(:disabled) { background: var(--primary-press); }
+        .btn-primary:active:not(:disabled) { transform: scale(0.985); }
+        .btn-primary:disabled {
+            background: var(--surface-mute);
+            color: var(--ink-200);
+            cursor: not-allowed;
         }
-        .btn-edit { background: #f39c12; color: white; }
-        .btn-edit:hover { background: #d68910; }
-        .btn-cancel { background: #e74c3c; color: white; }
-        .btn-cancel:hover { background: #c0392b; }
-        .btn-cancel-action { background: #95a5a6; color: white; }
-        .btn-cancel-action:hover { background: #7f8c8d; }
 
+        .btn-secondary {
+            padding: 14px 20px;
+            background: var(--surface-mute);
+            color: var(--ink-700);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .btn-secondary:hover { background: var(--line); }
+
+        /* =========================================================
+           My reservations list
+           ========================================================= */
+        .my-search {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 6px 0;
+            margin-bottom: 16px;
+        }
+
+        .res-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .res-item {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .res-item .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .res-item .theme-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--ink-900);
+            letter-spacing: -0.01em;
+        }
+        .res-item .meta {
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--ink-400);
+            margin-top: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .res-item .meta .dot { color: var(--ink-200); }
+        .res-item .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .res-item .actions button {
+            flex: 1;
+            padding: 11px 0;
+            background: var(--surface-mute);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink-700);
+            transition: background var(--dur) var(--ease);
+        }
+        .res-item .actions button:hover { background: var(--line); }
+        .res-item .actions .danger { color: var(--negative); }
+        .res-item .actions .danger:hover { background: rgba(240, 68, 82, 0.08); }
+        .res-item.expired .top { opacity: 0.6; }
+        .res-item.expired .actions { display: none; }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: var(--radius-pill);
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+        .status-chip.expired {
+            background: var(--surface-mute);
+            color: var(--ink-300);
+        }
+
+        /* =========================================================
+           Edit sheet (modal)
+           ========================================================= */
+        .sheet-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(25, 31, 40, 0.45);
+            z-index: 40;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 200ms var(--ease);
+        }
+        .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+
+        .sheet {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            margin: 0 auto;
+            max-width: 480px;
+            background: var(--surface);
+            border-radius: 24px 24px 0 0;
+            padding: 8px 20px calc(20px + env(safe-area-inset-bottom));
+            z-index: 41;
+            transform: translateY(100%);
+            transition: transform 280ms var(--ease);
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 520px) { .sheet { max-width: 480px; } }
+        .sheet.open { transform: translateY(0); }
+        .sheet .grabber {
+            width: 36px; height: 4px;
+            background: var(--ink-100);
+            border-radius: 2px;
+            margin: 8px auto 16px;
+        }
+        .sheet h3 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+        .sheet .sheet-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .sheet .sheet-actions .btn-primary,
+        .sheet .sheet-actions .btn-secondary { flex: 1; }
+
+        /* =========================================================
+           Messages / toasts
+           ========================================================= */
         .message {
-            padding: 12px 16px; border-radius: 8px; margin-top: 16px; display: none;
+            display: none;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 12px;
+            line-height: 1.5;
         }
-        .message.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .message.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; white-space: pre-line; }
+        .message.success {
+            display: block;
+            background: rgba(0, 200, 150, 0.10);
+            color: #00684E;
+        }
+        .message.error {
+            display: block;
+            background: rgba(240, 68, 82, 0.08);
+            color: var(--negative);
+            white-space: pre-line;
+        }
 
 
-        .empty { text-align: center; padding: 40px; color: #999; }
+        /* =========================================================
+           Empty state
+           ========================================================= */
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-300);
+            font-size: 14px;
+        }
+        .empty .big { font-size: 17px; font-weight: 700; color: var(--ink-500); margin-bottom: 6px; }
 
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        th { background: #f8f9fa; font-weight: 600; color: #555; }
-        tr:hover { background: #fafafa; }
+        .skeleton {
+            background: var(--surface-mute);
+            border-radius: var(--radius-md);
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse { 50% { opacity: 0.5; } }
 
-        .search-row { display: flex; gap: 12px; align-items: flex-end; }
-        .search-row .form-group { flex: 1; margin: 0; }
-        .edit-card { border-left: 4px solid #f39c12; }
-        .edit-card h3 { color: #f39c12; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+        }
     </style>
 </head>
 <body>
+<div class="app">
 
-<header>
-    <h1>방탈출 예약</h1>
-    <p>테마를 고르고, 탈출에 도전하세요!</p>
-    <a href="/admin.html" class="admin-link">관리자 페이지</a>
-</header>
+    <header class="topbar">
+        <h1>방탈출</h1>
+        <a href="/admin.html" class="admin-link">관리자</a>
+    </header>
 
-<nav>
-    <button class="active" onclick="showSection('popular', this)">인기 테마</button>
-    <button onclick="showSection('themes', this)">전체 테마</button>
-    <button onclick="showSection('reservation', this)">예약하기</button>
-    <button onclick="showSection('my-reservations', this)">내 예약</button>
-</nav>
+    <nav class="tabs" id="tabs">
+        <button class="active" data-tab="popular">인기 테마</button>
+        <button data-tab="themes">전체 테마</button>
+        <button data-tab="reservation">예약하기</button>
+        <button data-tab="my-reservations">내 예약</button>
+    </nav>
 
-<div class="container">
+    <main>
 
-    <div id="popular" class="section active">
-        <div class="card">
-            <h3>인기 테마</h3>
-            <p>최근 7일간 예약이 가장 많았던 테마 TOP 10</p>
-        </div>
-        <div id="popular-grid" class="theme-grid"></div>
-    </div>
+        <!-- ============ POPULAR ============ -->
+        <section id="popular" class="section active">
+            <div class="hero">
+                <h2>이번 주<br><span class="accent">가장 인기있는 테마</span></h2>
+                <p>최근 7일간 예약이 가장 많았던 TOP 10</p>
+            </div>
+            <div id="popular-grid" class="theme-grid"></div>
+        </section>
 
-    <div id="themes" class="section">
-        <div class="card">
-            <h3>전체 테마</h3>
-            <p>운영 중인 모든 방탈출 테마를 확인하세요</p>
-        </div>
-        <div id="themes-grid" class="theme-grid"></div>
-    </div>
+        <!-- ============ ALL THEMES ============ -->
+        <section id="themes" class="section">
+            <div class="section-header">
+                <h3>전체 테마</h3>
+                <span class="sub" id="themes-count"></span>
+            </div>
+            <div id="themes-grid" class="theme-grid"></div>
+        </section>
 
-    <div id="reservation" class="section">
-        <div class="card">
-            <h3>예약하기</h3>
-
-            <div class="form-group">
-                <label for="res-name">이름</label>
-                <input type="text" id="res-name" placeholder="2~10자" minlength="2" maxlength="10">
+        <!-- ============ RESERVATION ============ -->
+        <section id="reservation" class="section">
+            <div class="hero">
+                <h2>예약하기</h2>
+                <p>이름과 날짜, 테마를 선택해주세요</p>
             </div>
 
-            <div class="form-group">
-                <label for="res-date">날짜</label>
-                <input type="date" id="res-date">
-            </div>
-
-            <div class="form-group">
-                <label for="res-theme">테마</label>
-                <select id="res-theme">
-                    <option value="">-- 테마를 선택하세요 --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>예약 가능 시간</label>
-                <div id="time-slots" class="time-slots">
-                    <p class="empty">날짜와 테마를 먼저 선택해주세요</p>
+            <div class="field-list">
+                <div class="field">
+                    <label for="res-name">이름</label>
+                    <input type="text" id="res-name" placeholder="2~10자로 입력" minlength="2" maxlength="10">
+                </div>
+                <div class="field">
+                    <label for="res-date">날짜</label>
+                    <input type="date" id="res-date">
+                </div>
+                <div class="field">
+                    <label for="res-theme">테마</label>
+                    <select id="res-theme">
+                        <option value="">테마를 선택해주세요</option>
+                    </select>
                 </div>
             </div>
 
-            <button class="btn-primary" id="btn-reserve" onclick="makeReservation()" disabled>예약하기</button>
+            <div class="field-list">
+                <div class="field times">
+                    <label>예약 가능 시간</label>
+                    <div id="time-slots" class="time-slots">
+                        <div class="empty-slots">날짜와 테마를 먼저 선택해주세요</div>
+                    </div>
+                </div>
+            </div>
 
             <div id="res-message" class="message"></div>
-        </div>
-    </div>
+        </section>
 
-    <div id="my-reservations" class="section">
-        <div class="card">
-            <h3>내 예약 조회</h3>
-            <div class="search-row">
-                <div class="form-group">
+        <!-- ============ MY RESERVATIONS ============ -->
+        <section id="my-reservations" class="section">
+            <div class="hero">
+                <h2>내 예약</h2>
+                <p>예약 시 입력한 이름으로 조회해주세요</p>
+            </div>
+
+            <div class="my-search">
+                <div class="field">
                     <label for="my-name">이름</label>
                     <input type="text" id="my-name" placeholder="예약 시 입력한 이름">
                 </div>
-                <button class="btn-primary" onclick="loadMyReservations()" style="margin-bottom:0; white-space:nowrap;">조회</button>
             </div>
+
             <div id="my-message" class="message"></div>
-        </div>
+            <div id="my-reservation-list" class="res-list"></div>
+        </section>
 
-        <div id="edit-card" class="card edit-card" style="display:none;">
-            <h3>예약 변경</h3>
-            <input type="hidden" id="edit-id">
-            <input type="hidden" id="edit-theme-id">
-            <div class="form-group">
-                <label for="edit-date">변경할 날짜</label>
-                <input type="date" id="edit-date">
-            </div>
-            <div class="form-group">
-                <label>변경할 시간</label>
-                <div id="edit-time-slots" class="time-slots">
-                    <p class="empty">날짜를 먼저 선택해주세요</p>
-                </div>
-            </div>
-            <div style="display:flex; gap:8px; margin-top:8px;">
-                <button class="btn-primary" id="btn-patch" onclick="patchReservation()" disabled>변경하기</button>
-                <button class="btn-sm btn-cancel-action" onclick="closeEditCard()" style="padding:12px 20px; font-size:1rem;">취소</button>
-            </div>
-            <div id="edit-message" class="message"></div>
-        </div>
+    </main>
 
-        <div id="my-reservation-list"></div>
+    <!-- Bottom CTA -->
+    <div class="cta-dock" id="cta-dock" style="display:none;">
+        <button class="btn-primary" id="btn-reserve" disabled>예약하기</button>
     </div>
 
 </div>
 
+<!-- ============ EDIT SHEET (modal) ============ -->
+<div class="sheet-backdrop" id="sheet-backdrop"></div>
+<div class="sheet" id="edit-sheet" role="dialog" aria-modal="true">
+    <div class="grabber"></div>
+    <h3>예약 변경</h3>
+    <input type="hidden" id="edit-id">
+    <input type="hidden" id="edit-theme-id">
+    <div class="field-list">
+        <div class="field">
+            <label for="edit-date">변경할 날짜</label>
+            <input type="date" id="edit-date">
+        </div>
+        <div class="field times">
+            <label>변경할 시간</label>
+            <div id="edit-time-slots" class="time-slots">
+                <div class="empty-slots">날짜를 먼저 선택해주세요</div>
+            </div>
+        </div>
+    </div>
+    <div id="edit-message" class="message"></div>
+    <div class="sheet-actions">
+        <button class="btn-secondary" type="button" onclick="closeSheet()">닫기</button>
+        <button class="btn-primary" id="btn-patch" type="button" onclick="patchReservation()" disabled>변경하기</button>
+    </div>
+</div>
+
 <script>
+    /* =========================================================
+       State
+       ========================================================= */
     let selectedTimeId = null;
     let editSelectedTimeId = null;
+    let currentTab = 'popular';
 
-    function showSection(id, btn) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
+    /* =========================================================
+       Helpers
+       ========================================================= */
+    const $ = (id) => document.getElementById(id);
+
+    function showMessage(el, type, text) {
+        el.className = 'message ' + type;
+        el.textContent = text;
+    }
+
+    function hideMessage(el) {
+        el.className = 'message';
+        el.textContent = '';
+    }
+
+    async function parseError(res) {
+        try {
+            const data = await res.json();
+            return data.message || '오류가 발생했습니다.';
+        } catch {
+            return '오류가 발생했습니다.';
+        }
+    }
+
+    function todayISO() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    function isExpired(dateStr, timeStr) {
+        if (!dateStr) return false;
+        const now = new Date();
+        const target = new Date(dateStr + 'T' + (timeStr || '00:00') + ':00');
+        return target < now;
+    }
+
+    /* =========================================================
+       Tabs
+       ========================================================= */
+    function showSection(id) {
+        currentTab = id;
+        document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === id));
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+
+        // CTA dock visibility
+        const cta = $('cta-dock');
+        const btn = $('btn-reserve');
+        if (id === 'reservation') {
+            cta.style.display = 'block';
+            btn.textContent = '예약하기';
+            btn.onclick = makeReservation;
+            updateReservationCtaState();
+        } else if (id === 'my-reservations') {
+            cta.style.display = 'block';
+            btn.textContent = '조회하기';
+            btn.disabled = false;
+            btn.onclick = loadMyReservations;
+        } else {
+            cta.style.display = 'none';
+        }
 
         if (id === 'popular') loadPopularThemes();
         if (id === 'themes') loadAllThemes();
         if (id === 'reservation') loadThemeOptions();
     }
 
-    function showMessage(el, type, text) {
-        el.className = `message ${type}`;
-        el.textContent = text;
-        el.style.display = 'block';
-    }
+    document.querySelectorAll('.tabs button').forEach(b => {
+        b.addEventListener('click', () => showSection(b.dataset.tab));
+    });
 
-    async function parseError(res) {
-        try {
-            const data = await res.json();
-            return data.message;
-        } catch {
-            return '오류가 발생했습니다.';
-        }
-    }
-
+    /* =========================================================
+       Theme cards
+       ========================================================= */
     function renderThemeCard(theme, rank) {
         const card = document.createElement('div');
         card.className = 'theme-card';
         card.innerHTML = `
-            <img src="${theme.url}" alt="${theme.name}" onerror="this.style.display='none'">
+            <div class="thumb">
+                ${rank ? `<span class="rank">${rank}</span>` : ''}
+                <img src="${theme.url}" alt="${theme.name}" loading="lazy"
+                     onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#191F28,#4E5968)'">
+            </div>
             <div class="info">
-                <div class="title-row">
-                    ${rank ? `<span class="rank-badge">${rank}</span>` : ''}
-                    <h3>${theme.name}</h3>
-                </div>
+                <h4>${theme.name}</h4>
                 <p>${theme.description || ''}</p>
             </div>
         `;
         return card;
     }
 
+    function renderSkeletonGrid(el, n) {
+        el.innerHTML = '';
+        for (let i = 0; i < n; i++) {
+            const s = document.createElement('div');
+            s.className = 'theme-card';
+            s.innerHTML = `<div class="thumb skeleton" style="border-radius:0"></div>
+                           <div class="info"><div class="skeleton" style="height:14px;width:70%;margin-bottom:8px"></div>
+                           <div class="skeleton" style="height:12px;width:100%"></div></div>`;
+            el.appendChild(s);
+        }
+    }
+
     async function loadPopularThemes() {
-        const grid = document.getElementById('popular-grid');
-        grid.innerHTML = '';
+        const grid = $('popular-grid');
+        renderSkeletonGrid(grid, 4);
         try {
             const res = await fetch('/themes/ranks?limit=10');
             const data = await res.json();
             const themes = data.themes;
-            if (themes.length === 0) {
-                grid.innerHTML = '<p class="empty">아직 인기 테마가 없습니다</p>';
+            grid.innerHTML = '';
+            if (!themes.length) {
+                grid.innerHTML = '<div class="empty"><div class="big">아직 인기 테마가 없어요</div>곧 다시 확인해주세요</div>';
                 return;
             }
             themes.forEach((theme, i) => grid.appendChild(renderThemeCard(theme, i + 1)));
         } catch (e) {
-            grid.innerHTML = '<p class="empty">테마를 불러오지 못했습니다</p>';
+            grid.innerHTML = '<div class="empty"><div class="big">테마를 불러오지 못했어요</div>네트워크 상태를 확인해주세요</div>';
         }
     }
 
     async function loadAllThemes() {
-        const grid = document.getElementById('themes-grid');
-        grid.innerHTML = '';
+        const grid = $('themes-grid');
+        renderSkeletonGrid(grid, 6);
         try {
             const res = await fetch('/themes');
             const data = await res.json();
             const themes = data.themes;
-            if (themes.length === 0) {
-                grid.innerHTML = '<p class="empty">등록된 테마가 없습니다</p>';
+            $('themes-count').textContent = themes.length + '개';
+            grid.innerHTML = '';
+            if (!themes.length) {
+                grid.innerHTML = '<div class="empty"><div class="big">등록된 테마가 없어요</div></div>';
                 return;
             }
             themes.forEach(theme => grid.appendChild(renderThemeCard(theme)));
         } catch (e) {
-            grid.innerHTML = '<p class="empty">테마를 불러오지 못했습니다</p>';
+            grid.innerHTML = '<div class="empty"><div class="big">테마를 불러오지 못했어요</div></div>';
         }
     }
 
+    /* =========================================================
+       Reservation flow
+       ========================================================= */
     async function loadThemeOptions() {
-        const select = document.getElementById('res-theme');
+        const select = $('res-theme');
         const current = select.value;
-        select.innerHTML = '<option value="">-- 테마를 선택하세요 --</option>';
+        select.innerHTML = '<option value="">테마를 선택해주세요</option>';
         try {
             const res = await fetch('/themes');
             const data = await res.json();
-            const themes = data.themes;
-            themes.forEach(theme => {
+            data.themes.forEach(theme => {
                 const opt = document.createElement('option');
                 opt.value = theme.id;
                 opt.textContent = theme.name;
@@ -338,14 +861,14 @@
     }
 
     async function loadAvailableTimes() {
-        const date = document.getElementById('res-date').value;
-        const themeId = document.getElementById('res-theme').value;
-        const container = document.getElementById('time-slots');
+        const date = $('res-date').value;
+        const themeId = $('res-theme').value;
+        const container = $('time-slots');
         selectedTimeId = null;
-        document.getElementById('btn-reserve').disabled = true;
+        updateReservationCtaState();
 
         if (!date || !themeId) {
-            container.innerHTML = '<p class="empty">날짜와 테마를 먼저 선택해주세요</p>';
+            container.innerHTML = '<div class="empty-slots">날짜와 테마를 먼저 선택해주세요</div>';
             return;
         }
 
@@ -353,8 +876,8 @@
             const res = await fetch(`/times/${themeId}?date=${date}`);
             const data = await res.json();
             const times = data.times;
-            if (times.length === 0) {
-                container.innerHTML = '<p class="empty">예약 가능한 시간이 없습니다</p>';
+            if (!times.length) {
+                container.innerHTML = '<div class="empty-slots">예약 가능한 시간이 없어요</div>';
                 return;
             }
             container.innerHTML = '';
@@ -367,7 +890,7 @@
                 container.appendChild(btn);
             });
         } catch (e) {
-            container.innerHTML = '<p class="empty">시간을 불러오지 못했습니다</p>';
+            container.innerHTML = '<div class="empty-slots">시간을 불러오지 못했어요</div>';
         }
     }
 
@@ -375,26 +898,32 @@
         document.querySelectorAll('#time-slots .time-slot').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedTimeId = timeId;
-        document.getElementById('btn-reserve').disabled = false;
+        updateReservationCtaState();
+    }
+
+    function updateReservationCtaState() {
+        const name = $('res-name').value.trim();
+        const date = $('res-date').value;
+        const themeId = $('res-theme').value;
+        const ok = name.length >= 2 && name.length <= 10 && date && themeId && selectedTimeId;
+        $('btn-reserve').disabled = !ok;
     }
 
     async function makeReservation() {
-        const name = document.getElementById('res-name').value.trim();
-        const date = document.getElementById('res-date').value;
-        const themeId = document.getElementById('res-theme').value;
-        const msgEl = document.getElementById('res-message');
-
-        msgEl.style.display = 'none';
+        const name = $('res-name').value.trim();
+        const date = $('res-date').value;
+        const themeId = $('res-theme').value;
+        const msgEl = $('res-message');
+        hideMessage(msgEl);
 
         if (!name || name.length < 2 || name.length > 10) {
-            showMessage(msgEl, 'error', '이름은 2자 이상 10자 이하로 입력해주세요.');
-            return;
+            return showMessage(msgEl, 'error', '이름은 2자 이상 10자 이하로 입력해주세요');
         }
         if (!date || !themeId || !selectedTimeId) {
-            showMessage(msgEl, 'error', '모든 항목을 입력해주세요.');
-            return;
+            return showMessage(msgEl, 'error', '모든 항목을 입력해주세요');
         }
 
+        $('btn-reserve').disabled = true;
         try {
             const res = await fetch('/reservations', {
                 method: 'POST',
@@ -403,30 +932,35 @@
             });
 
             if (res.ok) {
-                showMessage(msgEl, 'success', `"${name}"님의 ${date} 예약이 완료되었습니다!`);
+                showMessage(msgEl, 'success', `"${name}"님의 예약이 완료되었어요`);
                 selectedTimeId = null;
-                document.getElementById('btn-reserve').disabled = true;
                 loadAvailableTimes();
+                $('res-name').value = '';
+                updateReservationCtaState();
             } else {
-                showMessage(msgEl, 'error', await parseError(res));
+                const m = await parseError(res);
+                showMessage(msgEl, 'error', m);
+                $('btn-reserve').disabled = false;
             }
         } catch (e) {
-            showMessage(msgEl, 'error', '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+            showMessage(msgEl, 'error', '네트워크 오류가 발생했어요. 다시 시도해주세요.');
+            $('btn-reserve').disabled = false;
         }
     }
 
-    // ---- 내 예약 ----
-
+    /* =========================================================
+       My reservations
+       ========================================================= */
     async function loadMyReservations() {
-        const name = document.getElementById('my-name').value.trim();
-        const msgEl = document.getElementById('my-message');
-        const listEl = document.getElementById('my-reservation-list');
+        const name = $('my-name').value.trim();
+        const msgEl = $('my-message');
+        const listEl = $('my-reservation-list');
 
-        msgEl.style.display = 'none';
+        hideMessage(msgEl);
         listEl.innerHTML = '';
 
         if (!name) {
-            showMessage(msgEl, 'error', '이름을 입력해주세요.');
+            showMessage(msgEl, 'error', '이름을 입력해주세요');
             return;
         }
 
@@ -440,75 +974,84 @@
             }
 
             const reservations = data.reservations;
-            if (reservations.length === 0) {
-                listEl.innerHTML = '<div class="card"><p class="empty">예약 내역이 없습니다</p></div>';
+            if (!reservations.length) {
+                listEl.innerHTML = '<div class="empty"><div class="big">예약 내역이 없어요</div>새 예약을 만들어보세요</div>';
                 return;
             }
 
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <table>
-                    <thead>
-                        <tr><th>날짜</th><th>시간</th><th>테마</th><th></th><th></th></tr>
-                    </thead>
-                    <tbody>
-                        ${reservations.map(r => `
-                            <tr>
-                                <td>${r.date}</td>
-                                <td>${r.time ? r.time.startAt : '-'}</td>
-                                <td>${r.theme ? r.theme.name : '-'}</td>
-                                <td><button class="btn-sm btn-edit" onclick="showEditCard(${r.id}, ${r.theme ? r.theme.id : 0})">변경</button></td>
-                                <td><button class="btn-sm btn-cancel" onclick="cancelMyReservation(${r.id})">취소</button></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            listEl.appendChild(card);
+            reservations.sort((a, b) => (a.date + (a.time?.startAt || '')).localeCompare(b.date + (b.time?.startAt || '')));
+
+            reservations.forEach(r => {
+                const expired = isExpired(r.date, r.time?.startAt);
+                const item = document.createElement('div');
+                item.className = 'res-item' + (expired ? ' expired' : '');
+                item.innerHTML = `
+                    <div class="top">
+                        <div>
+                            <div class="theme-name">${r.theme ? r.theme.name : '-'}</div>
+                            <div class="meta">
+                                <span>${r.date}</span><span class="dot">·</span><span>${r.time ? r.time.startAt : '-'}</span>
+                            </div>
+                        </div>
+                        <span class="status-chip ${expired ? 'expired' : ''}">${expired ? '지난 예약' : '예약 확정'}</span>
+                    </div>
+                    <div class="actions">
+                        <button type="button" onclick="showEditSheet(${r.id}, ${r.theme ? r.theme.id : 0})">변경하기</button>
+                        <button type="button" class="danger" onclick="cancelMyReservation(${r.id})">예약 취소</button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
         } catch (e) {
-            showMessage(msgEl, 'error', '네트워크 오류가 발생했습니다.');
+            showMessage(msgEl, 'error', '네트워크 오류가 발생했어요.');
         }
     }
 
     async function cancelMyReservation(id) {
-        if (!confirm('예약을 취소하시겠습니까?')) return;
+        if (!confirm('예약을 취소하시겠어요?')) return;
         try {
             const res = await fetch(`/reservations/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 loadMyReservations();
             } else {
-                const msg = await parseError(res);
-                alert(msg);
+                showMessage($('my-message'), 'error', await parseError(res));
             }
         } catch (e) {
-            alert('네트워크 오류가 발생했습니다.');
+            showMessage($('my-message'), 'error', '네트워크 오류가 발생했어요');
         }
     }
 
-    function showEditCard(reservationId, themeId) {
+    /* =========================================================
+       Edit sheet
+       ========================================================= */
+    function showEditSheet(reservationId, themeId) {
         editSelectedTimeId = null;
-        document.getElementById('edit-id').value = reservationId;
-        document.getElementById('edit-theme-id').value = themeId;
-        document.getElementById('edit-date').value = '';
-        document.getElementById('edit-date').min = new Date().toISOString().split('T')[0];
-        document.getElementById('edit-time-slots').innerHTML = '<p class="empty">날짜를 먼저 선택해주세요</p>';
-        document.getElementById('btn-patch').disabled = true;
-        document.getElementById('edit-message').style.display = 'none';
-        document.getElementById('edit-card').style.display = 'block';
-        document.getElementById('edit-card').scrollIntoView({ behavior: 'smooth' });
+        $('edit-id').value = reservationId;
+        $('edit-theme-id').value = themeId;
+        $('edit-date').value = '';
+        $('edit-date').min = todayISO();
+        $('edit-time-slots').innerHTML = '<div class="empty-slots">날짜를 먼저 선택해주세요</div>';
+        $('btn-patch').disabled = true;
+        hideMessage($('edit-message'));
+        $('sheet-backdrop').classList.add('open');
+        $('edit-sheet').classList.add('open');
     }
 
-    function closeEditCard() {
-        document.getElementById('edit-card').style.display = 'none';
+    /* Legacy alias kept for any inline calls */
+    function showEditCard(reservationId, themeId) { showEditSheet(reservationId, themeId); }
+    function closeEditCard() { closeSheet(); }
+
+    function closeSheet() {
+        $('sheet-backdrop').classList.remove('open');
+        $('edit-sheet').classList.remove('open');
     }
 
     async function loadEditTimes() {
-        const date = document.getElementById('edit-date').value;
-        const themeId = document.getElementById('edit-theme-id').value;
-        const container = document.getElementById('edit-time-slots');
+        const date = $('edit-date').value;
+        const themeId = $('edit-theme-id').value;
+        const container = $('edit-time-slots');
         editSelectedTimeId = null;
-        document.getElementById('btn-patch').disabled = true;
+        $('btn-patch').disabled = true;
 
         if (!date) return;
 
@@ -516,8 +1059,8 @@
             const res = await fetch(`/times/${themeId}?date=${date}`);
             const data = await res.json();
             const times = data.times;
-            if (times.length === 0) {
-                container.innerHTML = '<p class="empty">예약 가능한 시간이 없습니다</p>';
+            if (!times.length) {
+                container.innerHTML = '<div class="empty-slots">예약 가능한 시간이 없어요</div>';
                 return;
             }
             container.innerHTML = '';
@@ -530,7 +1073,7 @@
                 container.appendChild(btn);
             });
         } catch (e) {
-            container.innerHTML = '<p class="empty">시간을 불러오지 못했습니다</p>';
+            container.innerHTML = '<div class="empty-slots">시간을 불러오지 못했어요</div>';
         }
     }
 
@@ -538,13 +1081,14 @@
         document.querySelectorAll('#edit-time-slots .time-slot').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         editSelectedTimeId = timeId;
-        document.getElementById('btn-patch').disabled = false;
+        $('btn-patch').disabled = false;
     }
 
     async function patchReservation() {
-        const id = document.getElementById('edit-id').value;
-        const date = document.getElementById('edit-date').value;
-        const msgEl = document.getElementById('edit-message');
+        const id = $('edit-id').value;
+        const date = $('edit-date').value;
+        const msgEl = $('edit-message');
+        hideMessage(msgEl);
 
         try {
             const res = await fetch(`/reservations/user/${id}`, {
@@ -554,23 +1098,29 @@
             });
 
             if (res.ok) {
-                closeEditCard();
+                closeSheet();
                 loadMyReservations();
             } else {
                 showMessage(msgEl, 'error', await parseError(res));
             }
         } catch (e) {
-            showMessage(msgEl, 'error', '네트워크 오류가 발생했습니다.');
+            showMessage(msgEl, 'error', '네트워크 오류가 발생했어요.');
         }
     }
 
-    document.getElementById('res-date').addEventListener('change', loadAvailableTimes);
-    document.getElementById('res-theme').addEventListener('change', loadAvailableTimes);
-    document.getElementById('res-date').min = new Date().toISOString().split('T')[0];
-    document.getElementById('edit-date').addEventListener('change', loadEditTimes);
+    /* =========================================================
+       Bindings
+       ========================================================= */
+    $('res-date').addEventListener('change', loadAvailableTimes);
+    $('res-theme').addEventListener('change', loadAvailableTimes);
+    $('res-name').addEventListener('input', updateReservationCtaState);
+    $('res-date').min = todayISO();
+    $('edit-date').addEventListener('change', loadEditTimes);
 
+    $('sheet-backdrop').addEventListener('click', closeSheet);
+
+    /* Initial load */
     loadPopularThemes();
 </script>
-
 </body>
 </html>
